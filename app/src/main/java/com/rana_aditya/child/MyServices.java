@@ -7,6 +7,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
+import android.util.Log;
 import android.webkit.MimeTypeMap;
 import android.widget.Toast;
 
@@ -52,18 +53,19 @@ if (remoteMessage.getData().get("message").equals("SS")) {
     Vibrator vibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
     //vibrator.vibrate(1000);
     vibrator.vibrate(VibrationEffect.createOneShot(1000,VibrationEffect.DEFAULT_AMPLITUDE));
+    shownotification(remoteMessage.getData().get("title"), remoteMessage.getData().get("message"));
+    Log.d("OPENING SCREENSHOT CLASS","OPENING");
     Intent intent=new Intent(this,child.class);
     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
     startActivity(intent);
 
-    shownotification(remoteMessage.getData().get("title"), remoteMessage.getData().get("message"));
 
 }
 else if (remoteMessage.getData().get("message").equals("LL")){
 
     Vibrator vibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
     vibrator.vibrate(VibrationEffect.createOneShot(5000,VibrationEffect.DEFAULT_AMPLITUDE));
-    send("LL");
+    //send("LL");
     shownotification(remoteMessage.getData().get("title"),remoteMessage.getData().get("message"));
     //todo here do the geometrical location part to be done ...
 }

@@ -27,12 +27,21 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
+import com.google.android.gms.tasks.Continuation;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -63,6 +72,9 @@ public class child extends Activity {
     public  int width,height;
     private MediaProjectionManager mgr;
     Uri uri;
+    double time=System.currentTimeMillis();
+    StorageReference storage= FirebaseStorage.getInstance().getReference("uploads/");
+
 
 
 
@@ -255,8 +267,47 @@ tearDownMediaProjection();
                                     uri =  getImageUri(child.this, bitmap);
                                     if (uri!=null){
                                         Toast.makeText(child.this, uri.toString(),Toast.LENGTH_SHORT).show();
-Log.d("**********************",stren);
-                                         send("https://firebasestorage.googleapis.com/v0/b/test-879af.appspot.com/o/uploads%2F1562060454149.png?alt=media&token=72a1bf0c-a26d-4382-9248-886e59b29bac");
+                                      Log.d("**********************",stren);
+
+
+                                        final StorageReference store=storage.child(uri.getLastPathSegment()+".jpeg");
+                                        UploadTask uploadTask =store.putFile(uri);
+
+
+                                        uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                                            @Override
+                                            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                                                Log.d("SUCCESSFULLTASK","WE HAVE DONE IT");
+                                            }
+                                        }).addOnFailureListener(new OnFailureListener() {
+                                            @Override
+                                            public void onFailure(@NonNull Exception e) {
+                                                Log.d("EXCEPTION OCCURED",e.toString());
+                                            }
+                                        });
+                                        Task<Uri> urlTask=uploadTask.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
+                                            @Override
+                                            public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
+                                                if (!task.isSuccessful()){
+                                                    throw task.getException();
+                                                }
+                                                Log.d("xxxxxxxx",store.getDownloadUrl().toString());
+                                                return store.getDownloadUrl();
+                                            }
+                                        }).addOnCompleteListener(new OnCompleteListener<Uri>() {
+                                            @Override
+                                            public void onComplete(@NonNull Task<Uri> task) {
+                                                if (task.isSuccessful()){
+                                                    Uri downloaduri=task.getResult();
+                                                    if (downloaduri!=null && !downloaduri.toString().isEmpty()){
+                                                        Log.d("GETTING THE DOWNLOADABLE URL","doenloadable url");
+                                                        send(downloaduri.toString());
+                                                    }
+                                                }
+                                            }
+                                        });
+
+                                        // send("https://firebasestorage.googleapis.com/v0/b/test-879af.appspot.com/o/uploads%2F1562060454149.png?alt=media&token=72a1bf0c-a26d-4382-9248-886e59b29bac");
                                         finish();
                                     }
                                     else
@@ -291,6 +342,20 @@ Log.d("**********************",stren);
         JSONObject notifcationBody = new JSONObject();
         try {
             notifcationBody.put("title", "call me");
+            notifcationBody.put("message", string);
+            notification.put("to", TOPIC);
+            notification.put("data", notifcationBody);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        sendNotification(notification);
+    }
+
+    public void sendit(String string){
+        JSONObject notification = new JSONObject();
+        JSONObject notifcationBody = new JSONObject();
+        try {
+            notifcationBody.put("title", "image_url");
             notifcationBody.put("message", string);
             notification.put("to", TOPIC);
             notification.put("data", notifcationBody);
