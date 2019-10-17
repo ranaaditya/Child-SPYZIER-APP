@@ -3,6 +3,7 @@ package com.rana_aditya.child;
 
 import android.content.ContentResolver;
 import android.content.Intent;
+import android.location.Location;
 import android.net.Uri;
 import android.os.Build;
 import android.os.VibrationEffect;
@@ -20,8 +21,11 @@ import com.android.volley.AuthFailureError;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.Continuation;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.messaging.FirebaseMessaging;
@@ -36,6 +40,7 @@ import org.json.JSONObject;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Executor;
 
 public class MyServices extends FirebaseMessagingService {
 
@@ -43,14 +48,17 @@ public class MyServices extends FirebaseMessagingService {
     final private String FCM_API = "https://fcm.googleapis.com/fcm/send";
     final private String serverKey = "key=" + "AAAAyy_lCnI:APA91bGFWdKKPzfdl-dSvIGppCNObt2yoYSv_GJmuEXc0qMFvBYqLZCUGusCoAOjZrpFNLmCliFT4VTorkFZDez5BkblKbL-lL-43dp7NkJigK5UF008FnA7n9Jqxp3eyXaTWYWyzLbc";
     final private String contentType = "application/json";
-    public static final String TOPIC = "/topics/parent";
+    public static final String TOPIC = "/topics/parentclient";
+
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
         super.onMessageReceived(remoteMessage);
+
 if (remoteMessage.getData().get("message").equals("SS")) {
     Vibrator vibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
+    //for devices lower api
     //vibrator.vibrate(1000);
     vibrator.vibrate(VibrationEffect.createOneShot(1000,VibrationEffect.DEFAULT_AMPLITUDE));
     shownotification(remoteMessage.getData().get("title"), remoteMessage.getData().get("message"));
@@ -66,8 +74,12 @@ else if (remoteMessage.getData().get("message").equals("LL")){
     Vibrator vibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
     vibrator.vibrate(VibrationEffect.createOneShot(5000,VibrationEffect.DEFAULT_AMPLITUDE));
     //send("LL");
+    Log.d("SENT THE LOCATION INFORMATION ","LOCATION");
+   send_location();
     shownotification(remoteMessage.getData().get("title"),remoteMessage.getData().get("message"));
-    //todo here do the geometrical location part to be done ...
+
+
+
 }
 
 
@@ -131,12 +143,12 @@ else if (remoteMessage.getData().get("message").equals("LL")){
 
     }
 
-    public void send(String string){
+    public void send(String title ,String message){
         JSONObject notification = new JSONObject();
         JSONObject notifcationBody = new JSONObject();
         try {
-            notifcationBody.put("title", "call me");
-            notifcationBody.put("message",  string);
+            notifcationBody.put("title", title);
+            notifcationBody.put("message",  message);
 
             notification.put("to", TOPIC);
             notification.put("data", notifcationBody);
@@ -153,6 +165,22 @@ else if (remoteMessage.getData().get("message").equals("LL")){
 
     }
 
+private void send_location(){
 
+    FusedLocationProviderClient fusedLocationProviderClient;
+        fusedLocationProviderClient= LocationServices.getFusedLocationProviderClient(MyServices.this);
+        fusedLocationProviderClient.getLastLocation().addOnSuccessListener(new OnSuccessListener<Location>() {
+            @Override
+            public void onSuccess(Location location) {
+                if (location!=null){
+                    String lati=String.valueOf(location.getLatitude());
+                    String longi=String.valueOf(location.getLongitude());
+                    Log.d(lati,longi);
+                    send(lati,longi);
+                }
+            }
+        });
+
+}
 
 }

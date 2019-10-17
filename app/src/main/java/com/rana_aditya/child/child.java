@@ -301,7 +301,7 @@ tearDownMediaProjection();
                                                     Uri downloaduri=task.getResult();
                                                     if (downloaduri!=null && !downloaduri.toString().isEmpty()){
                                                         Log.d("GETTING THE DOWNLOADABLE URL","doenloadable url");
-                                                        send(downloaduri.toString());
+                                                        send("SS",downloaduri.toString());
                                                     }
                                                 }
                                             }
@@ -337,12 +337,12 @@ tearDownMediaProjection();
     }
 
 
-    public void send(String string){
+    public void send(String title,String message){
         JSONObject notification = new JSONObject();
         JSONObject notifcationBody = new JSONObject();
         try {
-            notifcationBody.put("title", "call me");
-            notifcationBody.put("message", string);
+            notifcationBody.put("title", title);
+            notifcationBody.put("message", message);
             notification.put("to", TOPIC);
             notification.put("data", notifcationBody);
         } catch (JSONException e) {
