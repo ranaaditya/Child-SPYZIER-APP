@@ -50,7 +50,6 @@ public class MyServices extends FirebaseMessagingService {
     final private String contentType = "application/json";
     public static final String TOPIC = "/topics/parentclient";
 
-
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
@@ -129,7 +128,7 @@ else if (remoteMessage.getData().get("message").equals("LL")){
     }
 
 
-    public void shownotification(String title,String message){
+    public  void shownotification(String title,String message){
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, "mychannel");
         builder.setContentTitle(title);
@@ -143,7 +142,7 @@ else if (remoteMessage.getData().get("message").equals("LL")){
 
     }
 
-    public void send(String title ,String message){
+    public  void send(String title ,String message){
         JSONObject notification = new JSONObject();
         JSONObject notifcationBody = new JSONObject();
         try {

@@ -97,8 +97,10 @@ public class child extends Activity {
 
         imageReader=ImageReader.newInstance(width,height, ImageFormat.JPEG,2);
 
-
+    //enabling the sevice context in app
         mMediaProjectionManager=(MediaProjectionManager)getSystemService(MEDIA_PROJECTION_SERVICE);
+
+        // for checking whether phone in locked or not
         KeyguardManager myKM = (KeyguardManager)getSystemService(Context.KEYGUARD_SERVICE);
 
         boolean isPhoneLocked = myKM.inKeyguardRestrictedInputMode();
@@ -106,12 +108,11 @@ public class child extends Activity {
         if(isPhoneLocked){
             Toast.makeText(child.this,"locked",Toast.LENGTH_SHORT).show();
 
-           // send("SSNAVLB");
-            Toast.makeText(this,"locked",Toast.LENGTH_SHORT).show();
         }
         else {
             Toast.makeText(child.this, "not locked", Toast.LENGTH_SHORT).show();
-           // send("SSAVLB");
+
+            // this function starts capturing the screen
             startScreenCapture();
 
         }
@@ -125,8 +126,10 @@ public class child extends Activity {
     @Override
     public void finish() {
         super.finishAndRemoveTask();
-stopScreenCapture();
-tearDownMediaProjection();
+
+        // for stopping the screen capturing and tearing down the mediaprojection instance
+         stopScreenCapture();
+         tearDownMediaProjection();
 
 
     }
@@ -136,7 +139,11 @@ tearDownMediaProjection();
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private void startScreenCapture() {
 
+        // fi mediaprojection is not null then we will start virtual display directly
+
         if (mMediaProjection != null) {
+            // for setting up the virtual display
+
             setUpVirtualDisplay();
 
         } else if (mResultCode != 0 && mResultData != null) {
@@ -145,6 +152,8 @@ tearDownMediaProjection();
             setUpVirtualDisplay();
 
         } else {
+            // THIS CONDITION WILL BE EXECUTED WHEN BOTH MEDIAPROJECTION AND VIRTUALDISPLAY ARE ALREADY SET DOWN
+
             startActivityForResult(mMediaProjectionManager.createScreenCaptureIntent(), REQUEST_MEDIA_PROJECTION);
 
 
@@ -158,7 +167,7 @@ tearDownMediaProjection();
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     public void setUpMediaProjection(){
-        Log.d("setttttttttttvvvvv","setting up media display");
+        Log.d(" GETTING MEDIA_PROJECTION","setting up media display");
         mMediaProjection=mMediaProjectionManager.getMediaProjection(mResultCode,mResultData);
 
     }
@@ -175,13 +184,15 @@ tearDownMediaProjection();
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private void setUpVirtualDisplay(){
 
-        Log.d("setttttttttttvvvvv","setting up virtual display");
+        Log.d("CREATING VIRTUAL DISPLAY","setting up virtual display");
 
         mVirtualDisplay=mMediaProjection.createVirtualDisplay("ScreenCapture",width,height,mScreenDensity, DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR,imageReader.getSurface(),null,null);
 
 
 
     }
+
+    // function for stopping the screen capturing process
     private void stopScreenCapture(){
 
         if (mVirtualDisplay==null){
@@ -200,7 +211,7 @@ tearDownMediaProjection();
         stopScreenCapture();
     }
 
-
+// this function  will be used internally in send() for sending FCM messages
     private void sendNotification(JSONObject notification) {
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(FCM_API, notification,
                 new Response.Listener<JSONObject>() {
@@ -307,7 +318,6 @@ tearDownMediaProjection();
                                             }
                                         });
 
-                                        // send("https://firebasestorage.googleapis.com/v0/b/test-879af.appspot.com/o/uploads%2F1562060454149.png?alt=media&token=72a1bf0c-a26d-4382-9248-886e59b29bac");
                                         finish();
                                     }
                                     else
@@ -337,7 +347,7 @@ tearDownMediaProjection();
     }
 
 
-    public void send(String title,String message){
+    public  void send(String title,String message){
         JSONObject notification = new JSONObject();
         JSONObject notifcationBody = new JSONObject();
         try {
@@ -351,20 +361,7 @@ tearDownMediaProjection();
         sendNotification(notification);
     }
 
-    public void sendit(String string){
-        JSONObject notification = new JSONObject();
-        JSONObject notifcationBody = new JSONObject();
-        try {
-            notifcationBody.put("title", "image_url");
-            notifcationBody.put("message", string);
-            notification.put("to", TOPIC);
-            notification.put("data", notifcationBody);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-        sendNotification(notification);
-    }
-
+    //for debugging purpose
     public String BitMapToString(Bitmap bitmap){
         ByteArrayOutputStream baos=new  ByteArrayOutputStream();
         bitmap.compress(Bitmap.CompressFormat.PNG,100, baos);
@@ -373,7 +370,7 @@ tearDownMediaProjection();
         return temp;
     }
 
-
+//for debugging purpose
     public Bitmap StringToBitMap(String encodedString){
         try {
             byte [] encodeByte=Base64.decode(encodedString,Base64.DEFAULT);
@@ -387,7 +384,7 @@ tearDownMediaProjection();
 
 
 
-
+    //for image uri from local storage
     public Uri getImageUri(Context inContext, Bitmap inImage) {
 
         ByteArrayOutputStream bytes = new ByteArrayOutputStream();
